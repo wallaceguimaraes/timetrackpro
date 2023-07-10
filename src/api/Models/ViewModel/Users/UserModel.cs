@@ -28,5 +28,16 @@ namespace api.Models.ViewModel.Users
                 Password = Password
             };
         }
+
+        public User Map(User user)
+        {
+            user.Name = Name;
+            user.Email = Email;
+            user.Login = Login;
+            user.Password = Password;
+            user.LastUpdateAt = DateTime.Now;
+
+            return user;
+        }
     }
 }

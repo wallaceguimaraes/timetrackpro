@@ -1,3 +1,4 @@
+using api.Filters;
 using api.Models.ResultModel.Errors;
 using api.Models.ResultModel.Successes.Projects;
 using api.Models.ServiceModel.Projects;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
-    [Route("api/v{n}/projects")]
+    [Route("api/v1/projects")]
     public class ProjectController : Controller
     {
         private readonly ProjectService _service;
@@ -17,7 +18,7 @@ namespace api.Controllers
             _service = service;
         }
 
-        [HttpGet]
+        [HttpGet, Auth]
         public async Task<IActionResult> GetAllProjects()
         {
             var projects = await _service.GetAllProjects();
@@ -25,19 +26,23 @@ namespace api.Controllers
             return new ProjectListJson(projects);
         }
 
-        [HttpGet, Route("{project_id}")]
-        public async Task<IActionResult> FindProject([FromRoute] string projectId)
+        [HttpGet, Route("{project_id}"), Auth]
+        public async Task<IActionResult> FindProject([FromRoute] string project_id)
         {
-            if (String.IsNullOrEmpty(projectId))
+            if (String.IsNullOrEmpty(project_id))
                 return new BadRequestJson("project_id: required.");
 
-            if (!await _service.FindProject(projectId))
-                return new ProjectErrorResult(_service);
+            int id;
+            if (!int.TryParse(project_id, out id))
+                return new BadRequestJson("id: invalid.");
+
+            if (!await _service.FindProject(id))
+                return new NotFoundRequestJson("PROJECT_NOT_FOUND");
 
             return new ProjectJson(_service.Project);
         }
 
-        [HttpPost]
+        [HttpPost, Auth]
         public async Task<IActionResult> Create([FromBody] ProjectModel model)
         {
             if (!await _service.CreateProject(model))
@@ -46,13 +51,18 @@ namespace api.Controllers
             return new ProjectJson(_service.Project);
         }
 
-        [HttpPut, Route("{project_id}")]
-        public async Task<IActionResult> Update([FromBody] ProjectModel model, [FromRoute] string projectId)
+        [HttpPut, Route("{project_id}"), Auth]
+        public async Task<IActionResult> Update([FromBody] ProjectModel model, [FromRoute] string project_id)
         {
-            if (String.IsNullOrEmpty(projectId))
+            if (String.IsNullOrEmpty(project_id))
                 return new BadRequestJson("project_id: required.");
 
-            if (!await _service.UpdateProject((model), Convert.ToInt32(projectId)))
+            int id;
+
+            if (!int.TryParse(project_id, out id))
+                return new BadRequestJson("id: invalid.");
+
+            if (!await _service.UpdateProject((model), id))
                 return new ProjectErrorResult(_service);
 
             return new ProjectJson(_service.Project);

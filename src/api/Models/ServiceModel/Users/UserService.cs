@@ -45,14 +45,27 @@ namespace api.Models.ServiceModel.Users
             return true;
         }
 
-        public async Task<bool> FindUser(string userId)
+        public async Task<bool> FindUser(int userId)
         {
-            User = await _dbContext.Users.WhereId(Convert.ToInt32(userId))
-                                            .SingleOrDefaultAsync();
+            User = await _dbContext.Users.WhereId(userId)
+                                         .IncludeTimesAndProject()
+                                         .SingleOrDefaultAsync();
             if (User is null)
                 return !(UserNotFound = true);
 
             return true;
+        }
+
+        public async Task<List<User>?> FindUsers(ICollection<int> userIds)
+        {
+            if (!userIds.Any())
+            {
+                UserNotFound = true;
+                return null;
+            }
+
+            return await _dbContext.Users.WhereIds(userIds)
+                                         .ToListAsync();
         }
 
         public async Task<bool> UpdateUser(UserModel model, int userId)
@@ -61,15 +74,13 @@ namespace api.Models.ServiceModel.Users
                 return !(UserUpdateError = true);
 
             User = await _dbContext.Users.WhereId(userId)
+                                         .IncludeTimesAndProject()
                                          .SingleOrDefaultAsync();
 
             if (User is null)
                 return !(UserNotFound);
 
-            User.Name = model.Name;
-            User.Email = model.Email;
-            User.Login = model.Login;
-            User.Password = model.Password;
+            User = model.Map(User);
 
             var salt = new Salt().ToString();
 
@@ -89,13 +100,17 @@ namespace api.Models.ServiceModel.Users
             return true;
         }
 
-
         public async Task<User?> FindUserAuthenticated(string userId)
         {
             if (String.IsNullOrEmpty(userId))
                 return null;
 
-            var user = await _dbContext.Users.WhereId(Convert.ToInt32(userId))
+            int id;
+
+            if (!int.TryParse(userId, out id))
+                return null;
+
+            var user = await _dbContext.Users.WhereId(id)
                                              .SingleOrDefaultAsync();
             return user;
         }

@@ -1,3 +1,4 @@
+using api.Filters;
 using api.Models.ResultModel.Errors;
 using api.Models.ResultModel.Successes.Employees;
 using api.Models.ServiceModel.Users;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
-    [Route("api/v{n}/users")]
+    [Route("api/v1/users")]
     public class UserController : Controller
     {
         private readonly UserService _service;
@@ -17,20 +18,24 @@ namespace api.Controllers
             _service = service;
         }
 
-        [HttpGet, Route("{id}")]
+        [HttpGet, Route("{id}"), Auth]
         public async Task<IActionResult> FindUser([FromRoute] string id)
         {
             if (String.IsNullOrEmpty(id))
                 return new BadRequestJson("id: required.");
 
-            if (!await _service.FindUser(id))
-                return new UserErrorResult(_service);
+            int userId;
+
+            if (!int.TryParse(id, out userId))
+                return new BadRequestJson("id: invalid.");
+
+            if (!await _service.FindUser(userId))
+                return new NotFoundRequestJson("USER_NOT_FOUND");
 
             return new UserJson(_service.User);
         }
 
-
-        [HttpPost]
+        [HttpPost, Auth]
         public async Task<IActionResult> Create([FromBody] UserModel model)
         {
             if (!await _service.CreateUser(model))
@@ -39,10 +44,18 @@ namespace api.Controllers
             return new UserJson(_service.User);
         }
 
-        [HttpPut, Route("{id}")]
-        public async Task<IActionResult> Update([FromBody] UserModel model, [FromRoute] string userId)
+        [HttpPut, Route("{id}"), Auth]
+        public async Task<IActionResult> Update([FromBody] UserModel model, [FromRoute] string id)
         {
-            if (!await _service.UpdateUser(model, (Convert.ToInt32(userId))))
+            if (String.IsNullOrEmpty(id))
+                return new BadRequestJson("id: required.");
+
+            int userId;
+
+            if (!int.TryParse(id, out userId))
+                return new BadRequestJson("id: invalid.");
+
+            if (!await _service.UpdateUser(model, userId))
                 return new UserErrorResult(_service);
 
             return new UserJson(_service.User);

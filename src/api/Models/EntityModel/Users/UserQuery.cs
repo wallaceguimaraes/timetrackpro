@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace api.Models.EntityModel.Users
 {
     public static class UserQuery
@@ -5,33 +7,14 @@ namespace api.Models.EntityModel.Users
         public static IQueryable<User> WhereId(this IQueryable<User> users, int userId)
             => users.Where(user => user.Id == userId);
 
-        // public static IQueryable<User> IncludePerson(this IQueryable<User> users)
-        // {
-        //     return users
-        //         .Include(user => user.Person)
-        //         .ThenInclude(person => person.NaturalPerson)
-        //         .Include(user => user.Person)
-        //         .ThenInclude(person => person.JuristicPerson);
-        // }
+        public static IQueryable<User> IncludeTimesAndProject(this IQueryable<User> users)
+            => users.Include(user => user.Times).ThenInclude(time => time.Project);
 
-        // public static IQueryable<User> IncludeRoles(this IQueryable<User> users)
-        // {
-        //     return users
-        //         .Include(user => user.Role);
-        // }
-        // public static IQueryable<User> IncludeAddress(this IQueryable<User> users)
-        // {
-        //     return users
-        //         .Include(user => user.Person)
-        //         .ThenInclude(person => person.Address);
-        // }
+        public static IQueryable<User> WhereIds(this IQueryable<User> users, ICollection<int> userIds)
+           => users.Where(user => userIds.Contains(user.Id));
 
-        public static IQueryable<User> WhereEmail(this IQueryable<User> users, string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return users;
+        public static IQueryable<User> WhereLogin(this IQueryable<User> users, string login)
+           => users.Where(user => user.Login == login);
 
-            return users.Where(user => user.Email == email);
-        }
     }
 }

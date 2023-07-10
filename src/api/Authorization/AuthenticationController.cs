@@ -17,7 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace api.Controllers
 {
-    [Route("/api/v{n}")]
+    [Route("api/v1")]
     public class AuthenticationController : Controller
     {
         private readonly UserAuthentication _userAuthentication;
@@ -57,14 +57,6 @@ namespace api.Controllers
 
             return new TokenJson(new JwtSecurityTokenHandler().WriteToken(token), _userAuthentication.User);
         }
-
-        // [HttpGet("whoami"),Auth]
-        // public Task<IActionResult> WhoAmI([FromBody] CredentialModel model)
-        // {
-        //     var whoAmI = HttpContext.WhoAmI();
-
-        //     return new WhoAmIJson(whoAmI);
-        // }
 
     }
 }

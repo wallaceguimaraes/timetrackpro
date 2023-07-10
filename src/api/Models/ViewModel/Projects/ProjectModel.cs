@@ -40,5 +40,26 @@ namespace api.Models.ViewModel.Projects
             return project;
         }
 
+        public Project Map(Project project)
+        {
+            project.Title = Title;
+            project.Description = Description;
+
+            var userProjects = new List<UserProject>();
+
+            var ids = UserIds.Select(x => x).ToList();
+
+            ids.ForEach(userId =>
+            {
+                var userProject = new UserProject();
+                userProject.Project = project;
+                userProject.UserId = userId;
+                userProjects.Add(userProject);
+            });
+
+            project.UserProjects = userProjects;
+
+            return project;
+        }
     }
 }

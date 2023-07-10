@@ -10,5 +10,6 @@ namespace api.Models.EntityModel.Projects
         public string? Description { get; set; }
         public ICollection<Time>? Times { get; set; }
         public ICollection<UserProject>? UserProjects { get; set; }
+
     }
 }

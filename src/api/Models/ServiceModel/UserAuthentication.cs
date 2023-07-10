@@ -35,7 +35,7 @@ namespace api.Models.ServiceModel
         public async Task<bool> SignIn(string login, string password)
         {
             User = await _dbContext.Users
-                .WhereEmail(login)
+                .WhereLogin(login)
                 .SingleOrDefaultAsync();
 
             if (User == null) return false;

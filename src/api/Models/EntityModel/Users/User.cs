@@ -13,5 +13,6 @@ namespace api.Models.EntityModel.Users
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? LastUpdateAt { get; set; }
         public ICollection<Time>? Times { get; set; }
+
     }
 }

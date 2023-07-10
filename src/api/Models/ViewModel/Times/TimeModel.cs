@@ -18,6 +18,9 @@ namespace api.Models.ViewModel.Times
         [JsonProperty("ended_at"), JsonRequiredValidate]
         public DateTime EndedAt { get; set; }
 
+        [JsonValidIf(ErrorMessage = "ended_at cannot be less than or equal to started_at")]
+        public bool EndedAtIsValid => !(EndedAt <= StartedAt);
+
         public Time Map()
         {
             return new Time
@@ -27,6 +30,16 @@ namespace api.Models.ViewModel.Times
                 StartedAt = StartedAt,
                 EndedAt = EndedAt
             };
+        }
+
+        public Time Map(Time time)
+        {
+            time.ProjectId = ProjectId;
+            time.UserId = UserId;
+            time.StartedAt = StartedAt;
+            time.EndedAt = EndedAt;
+
+            return time;
         }
     }
 }

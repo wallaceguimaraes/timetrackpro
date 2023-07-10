@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Net.Http.Headers;
-using System.Net;
 using api.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using api.Extensions.Http;
@@ -12,19 +11,11 @@ namespace api.Filters
 {
     public class AuthAttribute : Attribute, IAsyncAuthorizationFilter
     {
-        private const string Service = "Psystem";
-        private string _scope;
-        private readonly bool _requiredSecret;
+        private const string Service = "TimeTrack";
 
-        public AuthAttribute(string scope)
+        public AuthAttribute()
         {
-            _scope = scope;
-        }
 
-        public AuthAttribute(string? scope = null, bool requiredSecret = false)
-        {
-            _scope = scope;
-            _requiredSecret = requiredSecret;
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -32,12 +23,19 @@ namespace api.Filters
             var service = context.HttpContext.RequestServices.GetRequiredService<UserService>();
             var token = context.HttpContext.Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
 
+            if (String.IsNullOrEmpty(token))
+            {
+                context.Result = new UnauthorizedResult();
+                context.HttpContext.Response.Clear();
+                return;
+            }
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var jwtToken = tokenHandler.ReadJwtToken(token);
 
             if (jwtToken.ValidTo < DateTime.UtcNow)
             {
-                context.Result = new StatusCodeResult((int)HttpStatusCode.Unauthorized);
+                context.Result = new UnauthorizedResult();
                 context.HttpContext.Response.Clear();
                 return;
             }
@@ -52,7 +50,7 @@ namespace api.Filters
 
                 var user = await service.FindUserAuthenticated(userId);
 
-                if (user != null)
+                if (user != null && salt == user.Salt)
                 {
                     var whoAmI = new WhoAmI
                     {
@@ -63,7 +61,6 @@ namespace api.Filters
                     context.HttpContext.SetWhoAmI(whoAmI);
                     return;
                 }
-
             }
 
             context.Result = new UnauthorizedResult();

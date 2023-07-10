@@ -17,6 +17,8 @@ namespace api.Models.ResultModel.Errors
                 Message = "PROJECT_NOT_FOUND";
             if (service.ProjectUpdateError)
                 Message = "PROJECT_UPDATE_ERROR";
+            if (service.UserNotFound)
+                Message = "USER_NOT_FOUND";
 
         }
     }
