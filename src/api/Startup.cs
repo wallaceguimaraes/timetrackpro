@@ -1,17 +1,7 @@
-// using api.Extensions;
-// using api.Infrastructure.Authorization;
-// using api.Infrastructure.Context;
-// using api.Models.ServiceModels;
-// using api.Models.Interface;
-// using api.Extensions;
-
 using api.Data.Context;
 using api.Extensions.DependencyInjection;
 using api.Filters;
 using api.Infrastructure.Mvc;
-// using api.Extensions.DependencyInjection;
-// using api.Filters;
-// using api.Infrastructure.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -29,16 +19,16 @@ namespace api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews(options =>
-                    {
-                        options.Filters.Add(typeof(ErrorHandlerAttribute));
-                        options.Filters.Add(typeof(ModelValidationAttribute));
-                    })
-                    .AddNewtonsoftJson(options =>
-                    {
-                        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                        options.SerializerSettings.Converters.Add(new CustomEnumConverter());
-                    })
-                    .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
+            {
+                options.Filters.Add(typeof(ErrorHandlerAttribute));
+                options.Filters.Add(typeof(ModelValidationAttribute));
+            })
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.Converters.Add(new CustomEnumConverter());
+            })
+            .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
 
             services.AddJwtAuthentication(options =>
             {

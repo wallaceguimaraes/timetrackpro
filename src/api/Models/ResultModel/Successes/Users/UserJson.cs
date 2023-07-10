@@ -10,19 +10,7 @@ namespace api.Models.ResultModel.Successes.Employees
         public UserJson(User user)
         {
             User = user;
-            // Id = user.Id.ToString();
-            // Name = user.Name;
-            // Email = user.Email;
-            // Login = user.Login;
-            // CreatedAt = user.CreatedAt;
         }
-
-        // public string Id { get; set; }
-        // public string Name { get; set; }
-        // public string TaxDocument { get; set; }
-        // public string Email { get; set; }
-        // public string Login { get; set; }
-        // public DateTime CreatedAt { get; set; }
 
         public User User { get; set; }
 

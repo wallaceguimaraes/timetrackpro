@@ -1,0 +1,13 @@
+version: "3.4"
+
+services:
+  api:
+    container_name: timetrack
+    image: timetrack
+    environment:
+      - PORT=5000
+    ports:
+      - 5000:80
+    build:
+      context: .
+      dockerfile: Dockerfile
