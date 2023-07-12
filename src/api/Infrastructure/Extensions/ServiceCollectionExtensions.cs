@@ -1,5 +1,6 @@
 using System.Text;
 using api.Authorization;
+using api.Models.Interfaces;
 using api.Models.ServiceModel;
 using api.Models.ServiceModel.Projects;
 using api.Models.ServiceModel.Times;
@@ -40,7 +41,7 @@ namespace api.Extensions.DependencyInjection
 
         public static void AddTransientServices(this IServiceCollection services)
         {
-            services.AddTransient<UserAuthentication>();
+            services.AddTransient<IUserAuthentication, UserAuthentication>();
             services.AddTransient<UserService>();
             services.AddTransient<ProjectService>();
             services.AddTransient<TimeService>();

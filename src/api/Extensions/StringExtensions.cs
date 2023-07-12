@@ -45,6 +45,13 @@ namespace api.Extensions
             return Regex.Replace(str, "[^\\d]+", string.Empty);
         }
 
+        public static string OnlyLetters(this string str)
+        {
+            if (str == null) return str;
+            return Regex.Replace(str, "[^A-Za-z]+", string.Empty);
+        }
+
+
         public static string[] Words(this string str)
         {
             if (str == null) return new string[] { };

@@ -6,11 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using api.Data.Context;
 using api.Authorization;
 using api.Extensions;
+using api.Models.Interfaces;
 // using api.Extensions;
 
 namespace api.Models.ServiceModel
 {
-    public class UserAuthentication
+    public class UserAuthentication : IUserAuthentication
     {
         private readonly ApiDbContext _dbContext;
         private readonly AuthOptions _authOptions;
@@ -26,21 +27,16 @@ namespace api.Models.ServiceModel
 
 
         public User User { get; private set; }
-        public bool HashExpired { get; private set; }
-        public bool HashIsInvalid { get; private set; }
-        public bool WrongPassword { get; private set; }
-        public bool PasswordUsedRecently { get; private set; }
 
-
-        public async Task<bool> SignIn(string login, string password)
+        public async Task<(bool, User)> SignIn(string login, string password)
         {
             User = await _dbContext.Users
                 .WhereLogin(login)
                 .SingleOrDefaultAsync();
 
-            if (User == null) return false;
+            if (User == null) return (false, null);
 
-            return User.Password == password.Encrypt(User.Salt);
+            return (User.Password == password.Encrypt(User.Salt), User);
         }
     }
 }

@@ -1,8 +1,6 @@
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
-using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace api.Extensions.Http
 {
@@ -16,6 +14,7 @@ namespace api.Extensions.Http
 
         public static async Task<HttpResponseMessage> PostJsonAsync(this HttpClient httpClient, string requestUri, string content)
         {
+
             var jsonContent = new StringContent(content, Encoding.UTF8, "application/json");
             return await httpClient.PostAsync(requestUri, jsonContent);
         }

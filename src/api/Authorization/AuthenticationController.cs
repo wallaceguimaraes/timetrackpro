@@ -2,11 +2,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using api.Authorization;
+using api.Models.Interfaces;
 // using api.Authorization;
 // using api.Extensions.Http;
 // using api.Filters;
 // using api.Models.ResultModel.Successes;
-using api.Models.ServiceModel;
 using api.Models.ViewModel;
 using api.ResultModel.Successes.Authentication;
 // using api.Models.ViewModel;
@@ -20,10 +20,10 @@ namespace api.Controllers
     [Route("api/v1")]
     public class AuthenticationController : Controller
     {
-        private readonly UserAuthentication _userAuthentication;
+        private readonly IUserAuthentication _userAuthentication;
         private readonly AuthOptions _options;
 
-        public AuthenticationController(UserAuthentication userAuthentication,
+        public AuthenticationController(IUserAuthentication userAuthentication,
                                         IOptions<AuthOptions> options
                                         )
         {
@@ -34,14 +34,16 @@ namespace api.Controllers
         [HttpPost("authenticate")]
         public async Task<IActionResult> Signin([FromBody] CredentialModel model)
         {
-            if (!await _userAuthentication.SignIn(model.Login, model.Password))
+            var (success, user) = await _userAuthentication.SignIn(model.Login, model.Password);
+
+            if (!success)
                 return Unauthorized();
 
             var claims = new[]
             {
-                new Claim(ApiClaimTypes.UserId, _userAuthentication.User.Id.ToString()),
-                new Claim(ClaimTypes.Email, _userAuthentication.User.Email),
-                new Claim(ApiClaimTypes.Salt, _userAuthentication.User.Salt)
+                new Claim(ApiClaimTypes.UserId, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ApiClaimTypes.Salt, user.Salt)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
@@ -55,7 +57,7 @@ namespace api.Controllers
                 signingCredentials: creds
             );
 
-            return new TokenJson(new JwtSecurityTokenHandler().WriteToken(token), _userAuthentication.User);
+            return new TokenJson(new JwtSecurityTokenHandler().WriteToken(token), user);
         }
 
     }
