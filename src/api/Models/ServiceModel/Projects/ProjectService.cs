@@ -1,37 +1,37 @@
 using api.Data.Context;
 using api.Models.EntityModel.Projects;
-using api.Models.ServiceModel.Users;
+using api.Models.Interfaces;
 using api.Models.ViewModel.Projects;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Models.ServiceModel.Projects
 {
-    public class ProjectService
+    public class ProjectService : IProjectService
     {
         private readonly ApiDbContext? _dbContext;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
 
 
-        public ProjectService(ApiDbContext dbContext, UserService userService)
+        public ProjectService(ApiDbContext dbContext, IUserService userService)
         {
             _dbContext = dbContext;
             _userService = userService;
         }
 
         public Project Project { get; private set; }
-        public bool ProjectRegisterError { get; private set; }
-        public bool ProjectUpdateError { get; private set; }
-        public bool ProjectNotFound { get; private set; }
-        public bool ProjectExisting { get; private set; }
-        public bool UserNotFound { get; private set; }
+        private const string PROJECT_REGISTER_ERROR = "PROJECT_REGISTER_ERROR";
+        private const string PROJECT_UPDATE_ERROR = "PROJECT_UPDATE_ERROR";
+        private const string PROJECT_NOT_FOUND = "PROJECT_NOT_FOUND";
+        private const string PROJECT_ALREADY_EXISTS = "PROJECT_ALREADY_EXISTS";
+        private const string USER_NOT_FOUND = "USER_NOT_FOUND";
 
 
-        public async Task<List<Project>> GetAllProjects()
+        public async Task<List<Project>> GetAllProjects(int userId)
             => await _dbContext.Projects.IncludeTimes()
                                         .IncludeUserProject()
                                         .ToListAsync();
 
-        public async Task<bool> FindProject(int projectId)
+        public async Task<(bool success, Project project, string error)> FindProject(int projectId)
         {
             Project = await _dbContext.Projects.WhereId(projectId)
                                                .IncludeTimes()
@@ -39,24 +39,24 @@ namespace api.Models.ServiceModel.Projects
                                                .SingleOrDefaultAsync();
 
             if (Project is null)
-                return !(ProjectNotFound = true);
+                return (false, null, PROJECT_NOT_FOUND);
 
-            return true;
+            return (true, Project, null);
         }
 
-        public async Task<bool> CreateProject(ProjectModel model)
+        public async Task<(Project project, string error)> CreateProject(ProjectModel model)
         {
             if (model is null)
-                return !(ProjectRegisterError = true);
+                return (null, PROJECT_REGISTER_ERROR);
 
             var project = model.Map();
-            var hasProject = await _dbContext.Projects.WhereTitle(project.Title.ToLower()).AnyAsync();
+            var projectExists = await _dbContext.Projects.WhereTitle(project.Title.ToLower()).AnyAsync();
 
-            if (hasProject)
-                return !(ProjectExisting = true);
+            if (projectExists)
+                return (null, PROJECT_ALREADY_EXISTS);
 
             if (!await CheckIdsExisting(model.UserIds))
-                return false;
+                return (null, USER_NOT_FOUND);
 
             try
             {
@@ -65,26 +65,24 @@ namespace api.Models.ServiceModel.Projects
             }
             catch (Exception)
             {
-                return !(ProjectRegisterError = true);
+                return (null, PROJECT_REGISTER_ERROR);
             }
 
-            Project = project;
-
-            return true;
+            return (project, null);
         }
 
-        public async Task<bool> UpdateProject(ProjectModel model, int projectId)
+        public async Task<(Project project, string error)> UpdateProject(ProjectModel model, int projectId)
         {
             if (model is null)
-                return !(ProjectUpdateError = true);
+                return (null, PROJECT_UPDATE_ERROR);
 
             Project = await _dbContext.Projects.WhereId(projectId).SingleOrDefaultAsync();
 
             if (Project is null)
-                return !(ProjectNotFound = true);
+                return (null, PROJECT_NOT_FOUND);
 
             if (!await CheckIdsExisting(model.UserIds))
-                return !(UserNotFound = true);
+                return (null, USER_NOT_FOUND);
 
             Project = model.Map(Project);
 
@@ -95,21 +93,21 @@ namespace api.Models.ServiceModel.Projects
             }
             catch (Exception)
             {
-                return !(ProjectUpdateError = true);
+                return (null, PROJECT_UPDATE_ERROR);
             };
 
-            return true;
+            return (Project, null);
         }
 
         private async Task<bool> CheckIdsExisting(ICollection<int> userIds)
         {
-            var userExisting = await _userService.FindUsers(userIds);
-            var idsExisting = userExisting.Select(user => user.Id).ToList();
+            var response = await _userService.FindUsers(userIds);
+            var idsExisting = response.users.Select(user => user.Id).ToList();
 
             var idsNotExisting = userIds.Except(idsExisting);
 
             if (idsNotExisting.Any())
-                return !(UserNotFound = true);
+                return false;
 
             return true;
         }

@@ -16,7 +16,7 @@ namespace api.Data.Context
 {
     public class ApiDbContext : DbContext
     {
-        public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
+        public ApiDbContext(DbContextOptions options) : base(options)
         {
         }
 

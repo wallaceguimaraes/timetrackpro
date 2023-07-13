@@ -4,9 +4,13 @@ using api.Data.Context;
 using api.Filters;
 using api.Models.Interfaces;
 using api.Models.ServiceModel;
+using api.Models.ServiceModel.Projects;
+using api.Models.ServiceModel.Users;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using test.Fakes;
@@ -17,8 +21,7 @@ namespace tests.Fakes
     {
         public IWebHostEnvironment Environment { get; }
         public IConfigurationRoot Configuration { get; }
-        // private SqliteConnection connection;
-
+        private SqliteConnection connection;
 
         public StartupFake()
         {
@@ -32,6 +35,30 @@ namespace tests.Fakes
 
         public void ConfigureServices(IServiceCollection services)
         {
+            connection = new SqliteConnection("DataSource=:memory:");
+            connection.Open();
+
+            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<DbContextFake>));
+
+            if (descriptor != null)
+            {
+                services.Remove(descriptor);
+            }
+            services.AddDbContext<DbContextFake>(options =>
+            {
+                options.UseSqlite(connection)
+                .EnableSensitiveDataLogging();
+                // .LogTo(Console.WriteLine, LogLevel.Debug);
+                options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.MultipleCollectionIncludeWarning));
+
+            }, ServiceLifetime.Singleton);
+
+            using (var scope = services.BuildServiceProvider().CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<DbContextFake>();
+                dbContext.Database.EnsureCreated();
+            }
+
             services.AddRouting();
 
 
@@ -41,19 +68,6 @@ namespace tests.Fakes
                 options.Filters.Add(typeof(ModelValidationAttribute));
             })
             .AddApplicationPart(typeof(Startup).Assembly);
-
-
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<DbContextFake>));
-
-            if (descriptor != null)
-            {
-                services.Remove(descriptor);
-            }
-
-            services.AddDbContext<ApiDbContext>(options =>
-            {
-                options.UseInMemoryDatabase("TestDatabase");
-            });
 
             services.Configure<AuthOptions>(options =>
             {
@@ -65,13 +79,12 @@ namespace tests.Fakes
             });
 
             services.AddSingleton(Environment);
-            // services.AddSingleton<UserAuthentication>();
-            // services.AddSingleton<IUserAuthentication, UserAuthenticationFake>();
-            services.AddSingleton<DbContextFake>();
+            services.AddSingleton<ApiDbContext, DbContextFake>();
             services.AddSingleton<IUserAuthentication, UserAuthentication>();
-
-
+            services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<IProjectService, ProjectService>();
         }
+
 
         public void Configure(IApplicationBuilder app)
         {

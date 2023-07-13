@@ -1,4 +1,3 @@
-using api.Models.ServiceModel.Users;
 using api.Results.Errors;
 
 namespace api.Models.ResultModel.Errors
@@ -7,15 +6,9 @@ namespace api.Models.ResultModel.Errors
     {
         public UserErrorResult() { }
 
-        public UserErrorResult(UserService service)
+        public UserErrorResult(string error)
         {
-            if (service.UserRegisterError)
-                Message = "USER_REGISTER_ERROR";
-            if (service.UserUpdateError)
-                Message = "USER_UPDATE_ERROR";
-            if (service.UserNotFound)
-                Message = "USER_NOT_FOUND";
-
+            Message = error;
         }
     }
 }

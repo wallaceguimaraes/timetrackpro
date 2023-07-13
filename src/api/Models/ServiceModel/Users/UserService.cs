@@ -2,12 +2,13 @@ using api.Data.Context;
 using api.Extensions;
 using api.Infrastructure.Security;
 using api.Models.EntityModel.Users;
+using api.Models.Interfaces;
 using api.Models.ViewModel.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Models.ServiceModel.Users
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly ApiDbContext? _dbContext;
 
@@ -17,16 +18,22 @@ namespace api.Models.ServiceModel.Users
         }
 
         public User User { get; private set; }
-        public bool UserRegisterError { get; private set; }
-        public bool UserUpdateError { get; private set; }
-        public bool UserNotFound { get; private set; }
+        private const string USER_REGISTER_ERROR = "USER_REGISTER_ERROR";
+        private const string EMAIL_ALREADY_EXISTS = "EMAIL_ALREADY_EXISTS";
+        private const string USER_UPDATE_ERROR = "USER_UPDATE_ERROR";
+        private const string USER_NOT_FOUND = "USER_NOT_FOUND";
 
-        public async Task<bool> CreateUser(UserModel model)
+        public async Task<(User?, string?)> CreateUser(UserModel model)
         {
             if (model == null)
-                return !(UserRegisterError = true);
+                return (null, USER_REGISTER_ERROR);
 
             User = model.Map();
+
+            var emailExists = await CheckEmailExisting(User.Email);
+
+            if (emailExists)
+                return (null, EMAIL_ALREADY_EXISTS);
 
             var salt = new Salt().ToString();
             User.Salt = salt;
@@ -39,48 +46,54 @@ namespace api.Models.ServiceModel.Users
             }
             catch (Exception)
             {
-                return !(UserRegisterError = true);
+                return (null, USER_REGISTER_ERROR);
             }
 
-            return true;
+            return (User, null);
         }
 
-        public async Task<bool> FindUser(int userId)
+        public async Task<(bool, User?, string?)> FindUser(int userId)
         {
             User = await _dbContext.Users.WhereId(userId)
                                          .IncludeTimesAndProject()
                                          .SingleOrDefaultAsync();
             if (User is null)
-                return !(UserNotFound = true);
+                return (false, null, USER_NOT_FOUND);
 
-            return true;
+            return (true, User, null);
         }
 
-        public async Task<List<User>?> FindUsers(ICollection<int> userIds)
+        public async Task<(List<User>? users, string error)> FindUsers(ICollection<int> userIds)
         {
             if (!userIds.Any())
             {
-                UserNotFound = true;
-                return null;
+                return (null, USER_NOT_FOUND);
             }
 
-            return await _dbContext.Users.WhereIds(userIds)
+            var users = await _dbContext.Users.WhereIds(userIds)
                                          .ToListAsync();
+
+            return (users, null);
         }
 
-        public async Task<bool> UpdateUser(UserModel model, int userId)
+        public async Task<(User?, string)> UpdateUser(UserModel model, int userId)
         {
             if (model == null)
-                return !(UserUpdateError = true);
+                return (null, USER_UPDATE_ERROR);
 
             User = await _dbContext.Users.WhereId(userId)
                                          .IncludeTimesAndProject()
                                          .SingleOrDefaultAsync();
 
             if (User is null)
-                return !(UserNotFound);
+                return (null, USER_NOT_FOUND);
 
             User = model.Map(User);
+
+            var emailExists = await CheckEmailExisting(User.Email, userId);
+
+            if (emailExists)
+                return (null, EMAIL_ALREADY_EXISTS);
 
             var salt = new Salt().ToString();
 
@@ -94,10 +107,25 @@ namespace api.Models.ServiceModel.Users
             }
             catch (Exception)
             {
-                return !(UserUpdateError = true);
+                return (null, USER_UPDATE_ERROR);
             }
 
-            return true;
+            return (User, null);
+        }
+
+        private async Task<bool> CheckEmailExisting(string email, int id = 0)
+        {
+            bool emailExists = false;
+
+            if (id == 0)
+                emailExists = await _dbContext.Users.WhereEmail(email).AnyAsync();
+
+            if (id > 0)
+                emailExists = await _dbContext.Users.WhereEmail(email)
+                                                    .WhereNotId(id)
+                                                    .AnyAsync();
+
+            return emailExists;
         }
 
         public async Task<User?> FindUserAuthenticated(string userId)

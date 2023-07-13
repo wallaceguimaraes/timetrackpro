@@ -1,13 +1,10 @@
-// using api.Authorization;
 using Microsoft.Extensions.Options;
-// using api.Data.Context;
 using api.Models.EntityModel.Users;
 using Microsoft.EntityFrameworkCore;
 using api.Data.Context;
 using api.Authorization;
 using api.Extensions;
 using api.Models.Interfaces;
-// using api.Extensions;
 
 namespace api.Models.ServiceModel
 {

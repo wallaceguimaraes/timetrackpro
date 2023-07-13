@@ -1,7 +1,6 @@
 using api.Data.Context;
 using api.Models.EntityModel.Times;
-using api.Models.ServiceModel.Projects;
-using api.Models.ServiceModel.Users;
+using api.Models.Interfaces;
 using api.Models.ViewModel.Times;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,11 +9,11 @@ namespace api.Models.ServiceModel.Times
     public class TimeService
     {
         private readonly ApiDbContext? _dbContext;
-        private readonly ProjectService _projectService;
-        private readonly UserService _userService;
+        private readonly IProjectService _projectService;
+        private readonly IUserService _userService;
 
 
-        public TimeService(ApiDbContext dbContext, ProjectService projectService, UserService userService)
+        public TimeService(ApiDbContext dbContext, IProjectService projectService, IUserService userService)
         {
             _dbContext = dbContext;
             _projectService = projectService;
@@ -91,12 +90,12 @@ namespace api.Models.ServiceModel.Times
 
         private async Task<bool> CheckIdsExisting(int projectId, int userId)
         {
-            var projectExists = await _projectService.FindProject(projectId);
+            var response = await _projectService.FindProject(projectId);
 
-            if (!projectExists)
+            if (!response.success)
                 return !(ProjectNotFound = true);
 
-            var userExists = await _userService.FindUser(userId);
+            var (userExists, user, error) = await _userService.FindUser(userId);
 
             if (!userExists)
                 return !(UserNotFound = true);

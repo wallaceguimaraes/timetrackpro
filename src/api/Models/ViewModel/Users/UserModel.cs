@@ -31,10 +31,10 @@ namespace api.Models.ViewModel.Users
 
         public User Map(User user)
         {
-            user.Name = Name;
-            user.Email = Email;
-            user.Login = Login;
-            user.Password = Password;
+            user.Name = Name ?? user.Name;
+            user.Email = Email ?? user.Email;
+            user.Login = Login ?? user.Login;
+            user.Password = Password ?? user.Password;
             user.LastUpdateAt = DateTime.Now;
 
             return user;

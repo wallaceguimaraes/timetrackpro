@@ -1,7 +1,7 @@
 using api.Filters;
+using api.Models.Interfaces;
 using api.Models.ResultModel.Errors;
 using api.Models.ResultModel.Successes.Employees;
-using api.Models.ServiceModel.Users;
 using api.Models.ViewModel.Users;
 using api.Results.Errors;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +11,9 @@ namespace api.Controllers
     [Route("api/v1/users")]
     public class UserController : Controller
     {
-        private readonly UserService _service;
+        private readonly IUserService _service;
 
-        public UserController(UserService service)
+        public UserController(IUserService service)
         {
             _service = service;
         }
@@ -22,43 +22,54 @@ namespace api.Controllers
         public async Task<IActionResult> FindUser([FromRoute] string id)
         {
             if (String.IsNullOrEmpty(id))
-                return new BadRequestJson("id: required.");
+                return new BadRequestJson("Id: Required.");
 
             int userId;
 
             if (!int.TryParse(id, out userId))
-                return new BadRequestJson("id: invalid.");
+                return new BadRequestJson("Id: Invalid.");
 
-            if (!await _service.FindUser(userId))
-                return new NotFoundRequestJson("USER_NOT_FOUND");
+            var (success, user, error) = await _service.FindUser(userId);
 
-            return new UserJson(_service.User);
+            if (!success)
+                return new NotFoundRequestJson(error);
+
+            return new UserJson(user);
         }
 
         [HttpPost, Auth]
         public async Task<IActionResult> Create([FromBody] UserModel model)
         {
-            if (!await _service.CreateUser(model))
-                return new UserErrorResult(_service);
+            var (user, error) = await _service.CreateUser(model);
 
-            return new UserJson(_service.User);
+            if (!String.IsNullOrEmpty(error))
+                return new UserErrorResult(error);
+
+            return new UserJson(user);
         }
 
         [HttpPut, Route("{id}"), Auth]
         public async Task<IActionResult> Update([FromBody] UserModel model, [FromRoute] string id)
         {
             if (String.IsNullOrEmpty(id))
-                return new BadRequestJson("id: required.");
+                return new BadRequestJson("Id: Required.");
 
             int userId;
 
             if (!int.TryParse(id, out userId))
-                return new BadRequestJson("id: invalid.");
+                return new BadRequestJson("Id: Invalid.");
 
-            if (!await _service.UpdateUser(model, userId))
-                return new UserErrorResult(_service);
+            var (user, error) = await _service.UpdateUser(model, userId);
 
-            return new UserJson(_service.User);
+            if (!String.IsNullOrEmpty(error))
+            {
+                if (error.Equals("USER_NOT_FOUND"))
+                    return new NotFoundRequestJson(error);
+
+                return new UserErrorResult(error);
+            }
+
+            return new UserJson(user);
         }
     }
 }

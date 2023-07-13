@@ -4,8 +4,8 @@ using Microsoft.Net.Http.Headers;
 using api.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using api.Extensions.Http;
-using api.Models.ServiceModel.Users;
 using api.Models.EntityModel;
+using api.Models.Interfaces;
 
 namespace api.Filters
 {
@@ -20,7 +20,7 @@ namespace api.Filters
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            var service = context.HttpContext.RequestServices.GetRequiredService<UserService>();
+            var service = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
             var token = context.HttpContext.Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
 
             if (String.IsNullOrEmpty(token))

@@ -21,7 +21,7 @@ namespace tests.Functional
         public AuthenticateTest()
         {
             _fakeServer = new FakeServer();
-            _client = _fakeServer.CreateAuthenticatedClient();
+            _client = _fakeServer.CreateUnauthenticatedClient();
         }
 
         [Theory]
@@ -58,7 +58,7 @@ namespace tests.Functional
         [Fact]
         public async Task ShouldNotAuthenticateUserWhenUserNotExists()
         {
-            var model = new CredentialModel().Build();
+            var model = new CredentialModel().Build(login: "test");
             var response = await _client.PostJsonAsync($"{_basePath}", model);
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -80,6 +80,7 @@ namespace tests.Functional
             Assert.NotNull(json.Token);
             Assert.NotNull(json.User);
             Assert.Equal(user.Login, json.User.Login);
+            Assert.Equal(user.Salt, json.User.Salt);
         }
     }
 }
