@@ -8,11 +8,11 @@ namespace tests.Factories.Models.ViewModels
 {
     public static class ProjectModelFactory
     {
-        public static ProjectModel Build(this ProjectModel model, string title = null, string description = null)
+        public static ProjectModel Build(this ProjectModel model, ICollection<int> userIds, string title = null, string description = null)
         {
             model.Title = "novo projeto";
             model.Description = "projeto novo";
-
+            model.UserIds = userIds.Any() ? userIds : new List<int> { 1 };
 
             return model;
         }

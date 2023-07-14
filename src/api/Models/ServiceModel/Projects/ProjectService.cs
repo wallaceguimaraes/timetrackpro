@@ -29,8 +29,8 @@ namespace api.Models.ServiceModel.Projects
         public async Task<List<Project>> GetAllProjects(int userId)
             => await _dbContext.Projects.IncludeTimes()
                                         .IncludeUserProject()
+                                        .WhereUserId(userId)
                                         .ToListAsync();
-
         public async Task<(bool success, Project project, string error)> FindProject(int projectId)
         {
             Project = await _dbContext.Projects.WhereId(projectId)
@@ -46,11 +46,9 @@ namespace api.Models.ServiceModel.Projects
 
         public async Task<(Project project, string error)> CreateProject(ProjectModel model)
         {
-            if (model is null)
-                return (null, PROJECT_REGISTER_ERROR);
-
             var project = model.Map();
-            var projectExists = await _dbContext.Projects.WhereTitle(project.Title.ToLower()).AnyAsync();
+
+            var projectExists = await CheckProjectExisting(project.Title);
 
             if (projectExists)
                 return (null, PROJECT_ALREADY_EXISTS);
@@ -73,13 +71,17 @@ namespace api.Models.ServiceModel.Projects
 
         public async Task<(Project project, string error)> UpdateProject(ProjectModel model, int projectId)
         {
-            if (model is null)
-                return (null, PROJECT_UPDATE_ERROR);
-
-            Project = await _dbContext.Projects.WhereId(projectId).SingleOrDefaultAsync();
+            Project = await _dbContext.Projects.WhereId(projectId)
+                                               .IncludeUserProject()
+                                               .SingleOrDefaultAsync();
 
             if (Project is null)
                 return (null, PROJECT_NOT_FOUND);
+
+            var projectExists = await CheckProjectExisting(model.Title, projectId);
+
+            if (projectExists)
+                return (null, PROJECT_ALREADY_EXISTS);
 
             if (!await CheckIdsExisting(model.UserIds))
                 return (null, USER_NOT_FOUND);
@@ -110,6 +112,21 @@ namespace api.Models.ServiceModel.Projects
                 return false;
 
             return true;
+        }
+
+        private async Task<bool> CheckProjectExisting(string title, int id = 0)
+        {
+            bool projectExists = false;
+
+            if (id == 0)
+                projectExists = await _dbContext.Projects.WhereTitle(title).AnyAsync();
+
+            if (id > 0)
+                projectExists = await _dbContext.Projects.WhereTitle(title)
+                                                         .WhereNotId(id)
+                                                         .AnyAsync();
+
+            return projectExists;
         }
     }
 }

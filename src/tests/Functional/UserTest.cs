@@ -160,7 +160,7 @@ namespace tests.Functional
             _fakeServer.DbContext.Users.Add(user);
             _fakeServer.DbContext.SaveChanges();
 
-            var userOld = _fakeServer.DbContext.Users.WhereId(user.Id).AsNoTracking().SingleOrDefault();
+            var oldUser = _fakeServer.DbContext.Users.WhereId(user.Id).AsNoTracking().SingleOrDefault();
 
             var model = new UserModel
             {
@@ -174,11 +174,11 @@ namespace tests.Functional
             var json = await response.Content.ReadAsJsonAsync<UserJson>();
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotEqual(userOld.Login, json.User.Login);
-            Assert.NotEqual(userOld.Email, json.User.Email);
-            Assert.NotEqual(userOld.Password.Encrypt(userOld.Salt), json.User.Password);
-            Assert.Null(userOld.LastUpdateAt);
-            Assert.Equal(userOld.Name, json.User.Name);
+            Assert.NotEqual(oldUser.Login, json.User.Login);
+            Assert.NotEqual(oldUser.Email, json.User.Email);
+            Assert.NotEqual(oldUser.Password.Encrypt(oldUser.Salt), json.User.Password);
+            Assert.Null(oldUser.LastUpdateAt);
+            Assert.Equal(oldUser.Name, json.User.Name);
             Assert.NotNull(json.User.LastUpdateAt);
         }
 
@@ -189,7 +189,7 @@ namespace tests.Functional
             _fakeServer.DbContext.Users.Add(user);
             _fakeServer.DbContext.SaveChanges();
 
-            var userOld = _fakeServer.DbContext.Users.WhereId(user.Id).AsNoTracking().SingleOrDefault();
+            var oldUser = _fakeServer.DbContext.Users.WhereId(user.Id).AsNoTracking().SingleOrDefault();
 
             var model = new UserModel
             {
@@ -214,7 +214,7 @@ namespace tests.Functional
             _fakeServer.DbContext.Users.Add(user);
             _fakeServer.DbContext.SaveChanges();
 
-            var userOld = _fakeServer.DbContext.Users.WhereId(user.Id).AsNoTracking().SingleOrDefault();
+            var oldUser = _fakeServer.DbContext.Users.WhereId(user.Id).AsNoTracking().SingleOrDefault();
 
             var model = new UserModel
             {

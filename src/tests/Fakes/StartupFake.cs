@@ -2,6 +2,7 @@ using api;
 using api.Authorization;
 using api.Data.Context;
 using api.Filters;
+using api.Infrastructure.Mvc;
 using api.Models.Interfaces;
 using api.Models.ServiceModel;
 using api.Models.ServiceModel.Projects;
@@ -13,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using test.Fakes;
 
 namespace tests.Fakes
@@ -59,15 +61,19 @@ namespace tests.Fakes
                 dbContext.Database.EnsureCreated();
             }
 
-            services.AddRouting();
-
-
             services.AddControllersWithViews(options =>
             {
                 options.Filters.Add(typeof(ErrorHandlerAttribute));
                 options.Filters.Add(typeof(ModelValidationAttribute));
             })
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.Converters.Add(new CustomEnumConverter());
+            })
+            .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
             .AddApplicationPart(typeof(Startup).Assembly);
+
 
             services.Configure<AuthOptions>(options =>
             {

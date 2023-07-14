@@ -25,9 +25,6 @@ namespace api.Models.ServiceModel.Users
 
         public async Task<(User?, string?)> CreateUser(UserModel model)
         {
-            if (model == null)
-                return (null, USER_REGISTER_ERROR);
-
             User = model.Map();
 
             var emailExists = await CheckEmailExisting(User.Email);
@@ -78,9 +75,6 @@ namespace api.Models.ServiceModel.Users
 
         public async Task<(User?, string)> UpdateUser(UserModel model, int userId)
         {
-            if (model == null)
-                return (null, USER_UPDATE_ERROR);
-
             User = await _dbContext.Users.WhereId(userId)
                                          .IncludeTimesAndProject()
                                          .SingleOrDefaultAsync();
@@ -90,7 +84,7 @@ namespace api.Models.ServiceModel.Users
 
             User = model.Map(User);
 
-            var emailExists = await CheckEmailExisting(User.Email, userId);
+            var emailExists = await CheckEmailExisting(model.Email, userId);
 
             if (emailExists)
                 return (null, EMAIL_ALREADY_EXISTS);
