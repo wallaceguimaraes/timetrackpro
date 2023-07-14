@@ -189,7 +189,7 @@ Body request:
 
 Use this user already registered in the database
 
-"login": "test",
+"login": "teste",
 "password": "12345678"
 
 The database is temporarily hosted on the heroku server.
