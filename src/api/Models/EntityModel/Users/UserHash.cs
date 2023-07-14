@@ -1,6 +1,4 @@
-﻿// using api.Infrastructure.Security;
-// using Newtonsoft.Json;
-
+﻿
 namespace api.Models.EntityModel.Users
 {
     public class UserHash
@@ -15,35 +13,6 @@ namespace api.Models.EntityModel.Users
 
         public UserHash() { }
 
-        // public UserHash(User user, long applicationId)
-        // {
-        //     UserId = user.PersonId;
-        //     ApplicationId = applicationId;
-        //     ExpirationDate = DateTime.Now.AddDays(DaysToExpire);
-        //     Salt = user.Salt;
-        // }
 
-        // public override string ToString()
-        // {
-        //     var json = JsonConvert.SerializeObject(this);
-        //     var hash = new UrlEncryption().Encrypt(json);
-
-        //     return hash.Replace("+", "-").Replace("/", "_");
-        // }
-
-        // public static UserHash Decode(string hash)
-        // {
-        //     try
-        //     {
-        //         var hashReplaced = hash.Replace("-", "+").Replace("_", "/");
-        //         var decrypted = new UrlEncryption().Decrypt(hashReplaced);
-
-        //         return JsonConvert.DeserializeObject<UserHash>(decrypted);
-        //     }
-        //     catch
-        //     {
-        //         return null;
-        //     }
-        // }
     }
 }

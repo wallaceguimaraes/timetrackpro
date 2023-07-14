@@ -34,7 +34,7 @@ namespace api.Extensions.DependencyInjection
                     ValidateLifetime = true,
                     ValidIssuer = authOptions.Issuer,
                     ValidAudience = authOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("sua-chave-secreta")) // Defina a chave secreta para validar o token
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("sua-chave-secreta"))
                 };
             });
         }

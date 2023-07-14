@@ -28,7 +28,7 @@ namespace api.Models.ServiceModel.Users
         {
             User = model.Map();
 
-            var loginExists = await CheckLoginExisting(User.Email);
+            var loginExists = await CheckLoginExisting(User.Login);
 
             if (loginExists)
                 return (null, LOGIN_ALREADY_EXISTS);

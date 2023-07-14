@@ -7,12 +7,6 @@ namespace api.Models.EntityModel.Projects
         public static IQueryable<Project> WhereId(this IQueryable<Project> projects, int projectId)
            => projects.Where(project => project.Id == projectId);
 
-        //   public static IQueryable<Project> IncludeUser(this IQueryable<Project> projects, int userId)
-        //   {
-        //       return projects.Include(project => project.UserProjects.Where(userProject => userProject.UserId == userId));
-
-        //   }
-
         public static IQueryable<Project> IncludeTimes(this IQueryable<Project> projects)
            => projects.Include(project => project.Times);
         public static IQueryable<Project> IncludeUserProject(this IQueryable<Project> projects)

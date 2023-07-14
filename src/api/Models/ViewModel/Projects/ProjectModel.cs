@@ -48,8 +48,6 @@ namespace api.Models.ViewModel.Projects
 
             var userProjects = new List<UserProject>();
 
-            // var ids = UserIds.Select(x => x).ToList();
-
             var unregisteredUsers = UserIds.Except(project.UserProjects.Select(x => x.UserId)).ToList();
 
             unregisteredUsers.ForEach(userId =>

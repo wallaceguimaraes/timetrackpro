@@ -125,6 +125,18 @@ namespace tests.Functional
         }
 
         [Fact]
+        public async Task ShouldNotCreateUserWhenLoginExists()
+        {
+            var model = new UserModel().Build(login: "teste");
+
+            var response = await _client.PostJsonAsync($"{_basePath}", model);
+            var json = await response.Content.ReadAsJsonAsync<UnprocessableEntityJson>();
+
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+            Assert.Equal("LOGIN_ALREADY_EXISTS", json.Message);
+        }
+
+        [Fact]
         public async Task ShouldNotCreateUserWhenHasNotFieldsRequired()
         {
             var user = new User().Build();
@@ -204,6 +216,30 @@ namespace tests.Functional
 
             Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
             Assert.Equal("EMAIL_ALREADY_EXISTS", json.Message);
+        }
+
+        [Fact]
+        public async Task ShouldNotUpdateUserWhenLoginExists()
+        {
+            var user = new User().Build();
+            _fakeServer.DbContext.Users.Add(user);
+            _fakeServer.DbContext.SaveChanges();
+
+            var oldUser = _fakeServer.DbContext.Users.WhereId(user.Id).AsNoTracking().SingleOrDefault();
+
+            var model = new UserModel
+            {
+                Name = user.Name,
+                Login = "teste",
+                Email = "teste1@mail.com",
+                Password = "765432"
+            };
+
+            var response = await _client.PutJsonAsync($"{_basePath}/{user.Id}", model);
+            var json = await response.Content.ReadAsJsonAsync<UnprocessableEntityJson>();
+
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+            Assert.Equal("LOGIN_ALREADY_EXISTS", json.Message);
         }
 
         [Fact]
