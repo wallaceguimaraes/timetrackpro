@@ -20,7 +20,6 @@ namespace api.Models.EntityModel.Users
             entity.Property(e => e.LastUpdateAt).HasColumnName("UltimaAtualizacao");
 
             entity.HasIndex(e => e.Email);
-            entity.HasIndex(e => e.Password);
         }
     }
 }

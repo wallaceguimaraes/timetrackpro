@@ -31,44 +31,49 @@ The application's target audience is professionals who need to record working ho
 - Swashbuckle.AspNetCore v6.2.3
 - System.IdentityModel.Tokens.Jwt v6.31.0
 
-## Setup
+## Setup / Deploy
 
-1. Install .NET 6 SDK: ASP.NET Core 6 requires .NET 6 SDK installed on your machine. You can download the appropriate SDK for your operating system from the official Microsoft website: https://dotnet.microsoft.com/download/dotnet/6.0
+1. Clone this repository.
 
-2. Verify the installation: After installing the .NET 6 SDK, open a terminal (such as Command Prompt on Windows or Terminal on macOS/Linux) and run the command dotnet --version to verify that the installation completed correctly. It should display the installed .NET SDK version.
+2. Navigate to the project directory: Open a terminal and navigate to the project root directory using the cd command.
 
-3. Clone this repository.
+3. Access the folder ./src/api and run: dotnet restore 
 
-4. Navigate to the project directory: Open a terminal and navigate to the project root directory using the cd command.
-
-5. Access the folder ./src/api and run: dotnet restore 
-and then run command: dotnet run
-This will compile the project and start a local web server to host your application. By default, the application will be available at http://localhost:5000 (or https://localhost:5001 for HTTPS).
-
-6> Access the application in the browser: Open a web browser and access the URL 
-http://localhost:5000/api/request to view your running application.
-
-
-## Deploy
-
-Open the terminal in the root folder of the project and run the command: 
- 
-docker compose up.
+4. Open the terminal in the root folder of the project and run the command: 
+docker compose up
 
 After the command is executed, the container will be created, when the creation of the container is finished, the application will be available at the address. 
 
 http://localhost:5000
 
-The database will be temporarily hosted on heroku so you don't have to worry about database setup.
+5. Access the application in the browser: Open a web browser and access the URL 
+http://localhost:5000/api/request to view your running application.
+
+6. Before running any other endpoints it is necessary to create the container for the database. Then access the ./sqlserver folder by some terminal and execute the command: dotnet compose up
+
+7. After lifting the database container, access the project folder ./src/api and execute the command:
+dotnet ef database update
+This command will update the database with all the tables needed for the application.
+
+8. After creating the database tables, create your first user with the following 'password' and 'salt' directly into the database on the 'Usuario' screen:
+
+Encrypted password: rBG1oDjTq9qBhW4EI7ouNdkBxI9C/IdF/FlU1+hn5yg=
+Salt:d2de614740c24985b7194ba7f095e5a9
+
+
+9. Access the endpoint 
+
+POST
+http://localhost:5000/api/v1/authenticate
+
+Body request:
+
+{ "login": 'teste'; 
+  "password": 12345678 
+}
+
 ## Tests
 
 To run all the project's tests, access the ./src/tests folder and run the command:
 dotnet test
 
-## Development Hours
-
-[]
-
-## Contact
-
-[]

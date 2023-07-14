@@ -186,7 +186,7 @@ namespace tests.Functional
         }
 
         [Fact]
-        public async Task ShouldUpdateUser()
+        public async Task ShouldUpdateProject()
         {
             var userAuthenticated = _fakeServer.DbContext.Users.SingleOrDefault();
             var project = new Project().Build().WithUser(userAuthenticated);
@@ -301,6 +301,5 @@ namespace tests.Functional
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             Assert.Equal("USER_NOT_FOUND", json.Message);
         }
-
     }
 }
