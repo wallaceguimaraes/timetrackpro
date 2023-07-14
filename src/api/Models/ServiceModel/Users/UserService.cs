@@ -20,12 +20,18 @@ namespace api.Models.ServiceModel.Users
         public User User { get; private set; }
         private const string USER_REGISTER_ERROR = "USER_REGISTER_ERROR";
         private const string EMAIL_ALREADY_EXISTS = "EMAIL_ALREADY_EXISTS";
+        private const string LOGIN_ALREADY_EXISTS = "LOGIN_ALREADY_EXISTS";
         private const string USER_UPDATE_ERROR = "USER_UPDATE_ERROR";
         private const string USER_NOT_FOUND = "USER_NOT_FOUND";
 
         public async Task<(User?, string?)> CreateUser(UserModel model)
         {
             User = model.Map();
+
+            var loginExists = await CheckLoginExisting(User.Email);
+
+            if (loginExists)
+                return (null, LOGIN_ALREADY_EXISTS);
 
             var emailExists = await CheckEmailExisting(User.Email);
 
@@ -84,6 +90,11 @@ namespace api.Models.ServiceModel.Users
 
             User = model.Map(User);
 
+            var loginExists = await CheckLoginExisting(model.Login, userId);
+
+            if (loginExists)
+                return (null, LOGIN_ALREADY_EXISTS);
+
             var emailExists = await CheckEmailExisting(model.Email, userId);
 
             if (emailExists)
@@ -120,6 +131,21 @@ namespace api.Models.ServiceModel.Users
                                                     .AnyAsync();
 
             return emailExists;
+        }
+
+        private async Task<bool> CheckLoginExisting(string email, int id = 0)
+        {
+            bool loginExists = false;
+
+            if (id == 0)
+                loginExists = await _dbContext.Users.WhereLogin(email).AnyAsync();
+
+            if (id > 0)
+                loginExists = await _dbContext.Users.WhereLogin(email)
+                                                    .WhereNotId(id)
+                                                    .AnyAsync();
+
+            return loginExists;
         }
 
         public async Task<User?> FindUserAuthenticated(string userId)

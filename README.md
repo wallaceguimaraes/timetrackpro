@@ -164,6 +164,42 @@ PUT
 - Swashbuckle.AspNetCore v6.2.3
 - System.IdentityModel.Tokens.Jwt v6.31.0
 
+# Setup
+
+o install ASP.NET Core 6, follow these steps:
+
+Check system requirements:
+
+ASP.NET Core 6 requires the .NET 6 Runtime. Make sure you have the correct version installed on your system.
+Visit the official Microsoft website:
+
+Visit the .NET 6 download page at https://dotnet.microsoft.com/download/dotnet/6.0.
+Select the correct platform:
+
+Choose the appropriate .NET 6 Runtime version for your operating system. Windows, macOS, and Linux are supported.
+Download and install the .NET 6 Runtime:
+
+Follow the installation instructions specific to your operating system.
+Check the installation:
+
+After installation, open a terminal or command prompt and run the following command to verify that .NET 6 installed correctly:
+css
+Copy code
+dotnet --version
+Install the .NET 6 SDK (optional):
+
+If you want to develop ASP.NET Core 6 apps, you will also need to install the .NET 6 SDK. To do this, return to the .NET 6 download page and select the appropriate .NET 6 SDK for your operating system.
+Download and install the .NET 6 SDK:
+
+Follow the installation instructions provided.
+Check the SDK installation:
+
+After installation, open a terminal or command prompt and run the following command to verify that the .NET 6 SDK installed correctly:
+css
+Copy code
+dotnet --version
+
+
 ## Setup / Deploy
 
 1. Clone this repository.
