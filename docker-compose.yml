@@ -11,3 +11,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    networks:
+      - time_track
+
+networks:
+  time_track:
+    driver: bridge

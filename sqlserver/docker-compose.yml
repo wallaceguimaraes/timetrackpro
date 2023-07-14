@@ -1,6 +1,6 @@
 version: '2.1'
-services:
 
+services:
   mssqldata:
     image: mcr.microsoft.com/mssql/server:2019-latest
     entrypoint: /bin/bash
@@ -11,17 +11,20 @@ services:
       - 1433:1433
     volumes:
       - /var/opt/mssql
-      # we copy our scripts onto the container
-      - ./:/usr/src/app 
-    # bash will be executed from that path, our scripts folder
+      - ./:/usr/src/app
     deploy:
       resources:
         limits:
           memory: 4g
-    working_dir: /usr/src/app 
+    working_dir: /usr/src/app
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: Timetrack@2023!
-    # don't use this if you don't want to persit data between docker up and down
     volumes_from:
       - mssqldata
+    networks:
+      - time_track
+
+networks:
+  time_track:
+    driver: bridge
