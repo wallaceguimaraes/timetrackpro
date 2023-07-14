@@ -44,7 +44,7 @@ namespace api.Extensions.DependencyInjection
             services.AddTransient<IUserAuthentication, UserAuthentication>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IProjectService, ProjectService>();
-            services.AddTransient<TimeService>();
+            services.AddTransient<ITimeService, TimeService>();
 
         }
 

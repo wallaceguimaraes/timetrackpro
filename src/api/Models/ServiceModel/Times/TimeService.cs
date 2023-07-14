@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Models.ServiceModel.Times
 {
-    public class TimeService
+    public class TimeService : ITimeService
     {
         private readonly ApiDbContext? _dbContext;
         private readonly IProjectService _projectService;
@@ -22,20 +22,19 @@ namespace api.Models.ServiceModel.Times
 
         public Time Time { get; private set; }
         public List<Time> Times { get; private set; }
-        public bool TimeRegisterError { get; private set; }
-        public bool TimeNotRegistered { get; private set; }
-        public bool TimeNotFound { get; private set; }
-        public bool ProjectNotFound { get; private set; }
-        public bool UserNotFound { get; private set; }
-        public bool TimeUpdateError { get; private set; }
+        private const string TIME_RECORDING_ERROR = "TIME_RECORDING_ERROR";
+        private const string TIME_NOT_REGISTERED = "TIME_NOT_REGISTERED";
+        private const string TIME_NOT_FOUND = "TIME_NOT_FOUND";
+        private const string PROJECT_NOT_FOUND = "PROJECT_NOT_FOUND";
+        private const string USER_NOT_FOUND = "USER_NOT_FOUND";
+        private const string TIME_UPDATE_ERROR = "TIME_UPDATE_ERROR";
 
-        public async Task<bool> CreateTime(Time time)
+        public async Task<(Time time, string error)> CreateTime(Time time)
         {
-            if (time == null)
-                return !(TimeRegisterError = true);
+            var response = await CheckIdsExisting(time.ProjectId, time.UserId);
 
-            if (!await CheckIdsExisting(time.ProjectId, time.UserId))
-                return false;
+            if (!response.success)
+                return (null, response.error);
 
             try
             {
@@ -44,34 +43,36 @@ namespace api.Models.ServiceModel.Times
             }
             catch (Exception)
             {
-                return !(TimeRegisterError = true);
+                return (null, TIME_RECORDING_ERROR);
             }
 
-            Time = time;
-
-            return true;
+            return (time, null);
         }
 
-        public async Task<bool> GetTimesByProject(int projectId)
+        public async Task<(List<Time> times, string error)> GetTimesByProject(int projectId, int userId)
         {
             Times = await _dbContext.Times.WhereProjectId(projectId)
                                           .IncludeProject()
+                                          .WhereUserId(userId)
                                           .ToListAsync();
             if (!Times.Any())
-                return !(TimeNotRegistered = true);
+                return (null, TIME_NOT_REGISTERED);
 
-            return true;
+            return (Times, null);
         }
 
-        public async Task<bool> UpdateTime(TimeModel model, int timeId)
+        public async Task<(Time time, string error)> UpdateTime(TimeModel model, int timeId, int userId)
         {
             Time = await _dbContext.Times.WhereId(timeId)
+                                         .WhereUserId(userId)
                                          .SingleOrDefaultAsync();
             if (Time is null)
-                return !(TimeNotFound = true);
+                return (null, TIME_NOT_FOUND);
 
-            if (!await CheckIdsExisting(model.ProjectId, model.UserId))
-                return false;
+            var response = await CheckIdsExisting(model.ProjectId, model.UserId);
+
+            if (!response.success)
+                return (null, response.error);
 
             Time = model.Map(Time);
 
@@ -82,26 +83,25 @@ namespace api.Models.ServiceModel.Times
             }
             catch (Exception)
             {
-                return !(TimeUpdateError = true);
+                return (null, TIME_UPDATE_ERROR);
             }
 
-            return true;
+            return (Time, null);
         }
 
-        private async Task<bool> CheckIdsExisting(int projectId, int userId)
+        private async Task<(bool success, string error)> CheckIdsExisting(int projectId, int userId)
         {
             var response = await _projectService.FindProject(projectId);
 
             if (!response.success)
-                return !(ProjectNotFound = true);
+                return (false, PROJECT_NOT_FOUND);
 
             var (userExists, user, error) = await _userService.FindUser(userId);
 
             if (!userExists)
-                return !(UserNotFound = true);
+                return (false, USER_NOT_FOUND);
 
-            return true;
+            return (true, null);
         }
-
     }
 }

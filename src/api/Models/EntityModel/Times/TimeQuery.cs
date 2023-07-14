@@ -12,6 +12,8 @@ namespace api.Models.EntityModel.Times
 
         public static IQueryable<Time> WhereId(this IQueryable<Time> times, int timeId)
             => times.Where(time => time.Id == timeId);
+        public static IQueryable<Time> WhereUserId(this IQueryable<Time> times, int userId)
+            => times.Where(time => time.UserId == userId);
 
     }
 }

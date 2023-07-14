@@ -56,7 +56,6 @@ namespace tests.Functional
         public async Task ShouldNotFindProjectWhenUserHasNotAuthorization()
         {
             var response = await _fakeServer.CreateUnauthenticatedClient().GetAsync($"{_basePath}/2");
-            var json = await response.Content.ReadAsJsonAsync<NotFoundRequestJson>();
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }

@@ -43,7 +43,7 @@ namespace api.Controllers
             var (user, error) = await _service.CreateUser(model);
 
             if (!String.IsNullOrEmpty(error))
-                return new UserErrorResult(error);
+                return new UnprocessableEntityJson(error);
 
             return new UserJson(user);
         }
@@ -66,7 +66,7 @@ namespace api.Controllers
                 if (error.Equals("USER_NOT_FOUND"))
                     return new NotFoundRequestJson(error);
 
-                return new UserErrorResult(error);
+                return new UnprocessableEntityJson(error);
             }
 
             return new UserJson(user);

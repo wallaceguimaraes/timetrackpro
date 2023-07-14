@@ -6,6 +6,7 @@ using api.Infrastructure.Mvc;
 using api.Models.Interfaces;
 using api.Models.ServiceModel;
 using api.Models.ServiceModel.Projects;
+using api.Models.ServiceModel.Times;
 using api.Models.ServiceModel.Users;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -89,6 +90,8 @@ namespace tests.Fakes
             services.AddSingleton<IUserAuthentication, UserAuthentication>();
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IProjectService, ProjectService>();
+            services.AddTransient<ITimeService, TimeService>();
+
         }
 
 
