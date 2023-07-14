@@ -188,7 +188,8 @@ http://localhost:5000/api/request to view your running application.
  docker network inspect time_track
 
  If the network does not have any container connected, run the command:
- docker ps
+ to list the containers and add them to the network: docker ps
+ 
  docker network connect time_track timetrack
  docker network connect time_track sqlserver-mssql-1
 
