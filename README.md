@@ -164,82 +164,19 @@ PUT
 - Swashbuckle.AspNetCore v6.2.3
 - System.IdentityModel.Tokens.Jwt v6.31.0
 
-# Setup
-
-o install ASP.NET Core 6, follow these steps:
-
-Check system requirements:
-
-ASP.NET Core 6 requires the .NET 6 Runtime. Make sure you have the correct version installed on your system.
-Visit the official Microsoft website:
-
-Visit the .NET 6 download page at https://dotnet.microsoft.com/download/dotnet/6.0.
-Select the correct platform:
-
-Choose the appropriate .NET 6 Runtime version for your operating system. Windows, macOS, and Linux are supported.
-Download and install the .NET 6 Runtime:
-
-Follow the installation instructions specific to your operating system.
-Check the installation:
-
-After installation, open a terminal or command prompt and run the following command to verify that .NET 6 installed correctly:
-css
-Copy code
-dotnet --version
-Install the .NET 6 SDK (optional):
-
-If you want to develop ASP.NET Core 6 apps, you will also need to install the .NET 6 SDK. To do this, return to the .NET 6 download page and select the appropriate .NET 6 SDK for your operating system.
-Download and install the .NET 6 SDK:
-
-Follow the installation instructions provided.
-Check the SDK installation:
-
-After installation, open a terminal or command prompt and run the following command to verify that the .NET 6 SDK installed correctly:
-css
-Copy code
-dotnet --version
-
-
 ## Setup / Deploy
 
 1. Clone this repository.
 
 2. Navigate to the project directory: Open a terminal and navigate to the project root directory using the cd command.
 
-3. Before lifting the containers, we will create a network by running the following command:
-docker network create time_track
-
-4. Then list all networks with the command:
-docker network ls
-
-5. Open the terminal in the root folder of the project and run the command: 
+3. Open the terminal in the root folder of the project and run the command: 
 docker compose up
 
-6. Open a web browser and access the URL 
+4. Open a web browser and access the URL 
 http://localhost:5000/api/request to view your running application.
 
-7. Before running any other endpoints it is necessary to create the container for the database. Then access the ./sqlserver folder by some terminal and execute the command: docker compose up
-
-8. List the containers within the network with the command:
- docker network inspect time_track
-
- If the network does not have any container connected, run the command:
- to list the containers and add them to the network: docker ps
- 
- docker network connect time_track timetrack
- docker network connect time_track sqlserver-mssql-1
-
-9. After lifting the database container, access the project folder ./src/api and execute the command:
-dotnet ef database update
-This command will update the database with all the tables needed for the application.
-
-10. After creating the database tables, create your first user with the following 'password' and 'salt' directly into the database on the 'Usuario' screen:
-
-Encrypted password: rBG1oDjTq9qBhW4EI7ouNdkBxI9C/IdF/FlU1+hn5yg=
-Salt: d2de614740c24985b7194ba7f095e5a9
-
-
-11. Access the endpoint 
+5. Access the endpoint 
 
 POST
 http://localhost:5000/api/v1/authenticate
@@ -249,4 +186,11 @@ Body request:
 { "login": 'teste'; 
   "password": 12345678 
 }
+
+Use this user already registered in the database
+
+"login": "test",
+"password": "12345678"
+
+The database is temporarily hosted on the heroku server.
 
